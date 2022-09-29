@@ -1,6 +1,7 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:momo_universe/screen/paylink.dart';
+import 'package:firebase_core/firebase_core.dart';
 class Costumisepl extends StatefulWidget {
    Costumisepl({Key? key}) : super(key: key);
 
@@ -14,42 +15,14 @@ class _CostumiseplState extends State<Costumisepl> {
    var _slogan;
 
    var _amt;
-
    bool isVisible=false;
-
-
-   final _companyController = TextEditingController();
-
-  final _amtController = TextEditingController();
-
-  final _sloganController = TextEditingController();
-
    final _theme = ["pick a theme color","Blue","purple","Red","black","green"];
-
-   void initState(){
-     super.initState();
-     _amtController.addListener((){
-       setState(() {
-         _amt=_amtController.text;
-       });
-     });
-     _companyController.addListener((){
-       setState(() {
-         _companyname=_companyController.text;
-       });
-     });
-     _sloganController.addListener((){
-       setState(() {
-         _slogan=_sloganController.text;
-       });
-     });
-   }
-
+   final _formkey=GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
+     CollectionReference paylinks = FirebaseFirestore.instance.collection('paylinks');
     return Scaffold(
       appBar: AppBar(
-
       ),
       body: Container(
         child: Column(
@@ -59,31 +32,34 @@ class _CostumiseplState extends State<Costumisepl> {
                 child: ListView(
                   children: [
                     ListTile(
-                      title:Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              alignment: Alignment.center,
-                              child: Text("Click to add your company logo",style: TextStyle(
-                                  decorationStyle: TextDecorationStyle.wavy
-                              ),),
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-
-                              height: 100,
-                              padding: EdgeInsets.all(5),
-                              margin: EdgeInsets.all(15),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Colors.green,
-                                shape: BoxShape.circle,
+                      title:Form(
+                        key: _formkey,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                alignment: Alignment.center,
+                                child: Text("Click to add your company logo",style: TextStyle(
+                                    decorationStyle: TextDecorationStyle.wavy
+                                ),),
                               ),
-                              child: Icon(Icons.person, size: 60,),
                             ),
-                          ),
-                        ],
+                            Expanded(
+                              child: Container(
+
+                                height: 100,
+                                padding: EdgeInsets.all(5),
+                                margin: EdgeInsets.all(15),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(Icons.person, size: 60,),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
 
                     ),
@@ -91,8 +67,9 @@ class _CostumiseplState extends State<Costumisepl> {
                       title:Container(
                         margin: EdgeInsets.symmetric(vertical: 10.0),
                         child: TextFormField(
-                          controller: _companyController,
-                          validator: (value) {
+
+
+                            validator: (value) {
                             if(value== null || value.isEmpty){
                               return 'please enter Your Company name';
                             }
@@ -109,7 +86,7 @@ class _CostumiseplState extends State<Costumisepl> {
                       title:Container(
                         margin: EdgeInsets.symmetric(vertical: 10.0),
                         child: TextFormField(
-                          controller: _sloganController,
+
                           decoration: const InputDecoration(
                             hintText: "Enter your Company describtion",
                             icon: Icon(Icons.verified_user_outlined),
@@ -121,7 +98,7 @@ class _CostumiseplState extends State<Costumisepl> {
                       title:Container(
                         margin: EdgeInsets.symmetric(vertical: 10.0),
                         child: TextFormField(
-                          controller: _amtController,
+
                           decoration: const InputDecoration(
                             hintText: "enter amount to be recieved number",
                             icon: Icon(Icons.verified_user_outlined),
@@ -158,17 +135,12 @@ class _CostumiseplState extends State<Costumisepl> {
                             setState(() {
                               isVisible = ! isVisible;
                             });
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) {
-                            //       return Paylink(
-                            //         amt: _amtController.text,
-                            //         companyName: _companyController.text,
-                            //         slogan: _sloganController.text,
-                            //
-                            //       );
-                            //     },),);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return Paylink();
+                                },),);
                           },
                         ),
                       ),

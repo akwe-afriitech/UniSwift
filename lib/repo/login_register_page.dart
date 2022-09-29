@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:momo_universe/repo/auth_repository.dart';
 import 'auth.dart';
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -11,10 +12,14 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   String? errorMessage="";
   bool isLogin = true;
+  bool isVisible=false;
+
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
   final TextEditingController _controllerName = TextEditingController();
   final TextEditingController _controllerNum = TextEditingController();
+
+
 
   Future<void> signInWithEmailAndPassword()async{
     try {
@@ -57,11 +62,13 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
   Widget _errorMessage(){
-    return Text(errorMessage==""?"" : "please enter your correct credentials ");
+    return Text(errorMessage?? "");
   }
   Widget _submitButton(){
     return ElevatedButton(
-        onPressed: isLogin? signInWithEmailAndPassword : createUserWithEmailAndPassword,
+        onPressed: isLogin? signInWithEmailAndPassword : () async{
+       await   AuthenticationRepository().createAccount(email: _controllerEmail.text, password: _controllerPassword.text, name: _controllerName.text, number: _controllerNum.text,);
+        },
         child: Text(isLogin? "login" : "Register")
     );
   }
@@ -70,14 +77,27 @@ class _LoginPageState extends State<LoginPage> {
         onPressed:(){
           setState(() {
             isLogin = !isLogin;
+            isVisible = ! isVisible;
+
           });
         },
         child: Text(isLogin? "Register":"Login")
     );
   }
 
+
+
+  @override
+  void dispose() {
+_controllerNum.dispose();
+_controllerName.dispose();
+_controllerPassword.dispose();
+_controllerEmail.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: _title(),
@@ -90,9 +110,17 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            _entryField("Momo Name", _controllerName),
+            Visibility(
+              visible: isVisible ,
+              child: Column(
+                children: <Widget>[
+                  _entryField("Momo Name", _controllerName),
+                  _entryField("momo number", _controllerNum),
+                ],
+              ),
+            ),
+
             _entryField("email", _controllerEmail),
-            _entryField("momo number", _controllerNum),
             _entryField("password", _controllerPassword),
             _errorMessage(),
             _submitButton(),

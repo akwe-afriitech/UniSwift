@@ -125,8 +125,6 @@ class _LoginState extends State<Login> {
                               MaterialPageRoute(
                                 builder: (context) {
                                   return Dashboard2(
-                                    userNum: _numController.text,
-                                    userName: _userController.text,
                                   );
                                 },
                               ),

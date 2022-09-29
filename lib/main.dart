@@ -3,10 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:momo_universe/repo/widget_tree.dart';
 import 'package:momo_universe/screen/splash.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'repo/shared_pref_service.dart';
 
 Future<void>main ()async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+
   runApp(const MyApp());
 }
 
@@ -25,7 +30,7 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
-      home: Splash(),
+      home: WidgetTree(),
 
     );
   }

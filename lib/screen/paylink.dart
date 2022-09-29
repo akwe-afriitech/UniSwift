@@ -1,45 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Paylink extends StatelessWidget {
-   Paylink(
-      {Key? key, required this.amt, required this.companyName ,required this.slogan}
-      )
-      : super(key: key);
+   Paylink({Key? key}) : super(key: key);
+   final Stream<QuerySnapshot> paylinks =
+   FirebaseFirestore.instance.collection("paylinks").snapshots();
+   final Stream<QuerySnapshot> momo_universe =
+   FirebaseFirestore.instance.collection("momo_universe").snapshots();
 
-  String amt;
-  String companyName;
-  String slogan;
  final _useramt = TextEditingController();
-  showamt(){
-    if(amt.isEmpty){
-      return Container(
 
-        child: TextFormField(
-        controller: _useramt,
-        decoration: const InputDecoration(
-          hintText: "Enter amount to send",
-          icon: Icon(Icons.verified_user_outlined),
-        ),
-      ),
-
-    );
-    }else{
-      return Container(
-        width: 300,
-        height: 100,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-            color: Colors.green[100],
-          border: Border.all(width: 1,color: Colors.black12),
-          borderRadius: BorderRadius.circular(50)
-        ),
-        child: Text("${amt}frs FCFA", style: TextStyle(
-          fontWeight: FontWeight.bold, fontSize: 30
-        ),),
-      );
-    }
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,7 +39,7 @@ class Paylink extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
-                        child:Text("mad") ,
+                        child:Text("Logo") ,
                       ),
                     ),
                     Expanded(
@@ -77,13 +48,49 @@ class Paylink extends StatelessWidget {
                         children: [
                           Container(
                             alignment:Alignment.centerLeft,
-                            child: Text(companyName, style: TextStyle(
-                              fontSize:30, fontWeight: FontWeight.bold,
-                            ),),
+                            child:StreamBuilder<QuerySnapshot>(
+                              stream: paylinks,
+                              builder: (
+                                  BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot,
+                                  ) {
+                                if (snapshot.hasError) {
+                                  return Text("error loading data");
+                                }
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return Text("loading.....");
+                                }
+                                final data1 = snapshot.requireData;
+                                return Text("${data1.docs[0]['companyName']}",
+                                  style: TextStyle(
+                                    fontSize:30, fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                           Container(
                             alignment:Alignment.centerLeft,
-                            child: Text(slogan),
+                            child: StreamBuilder<QuerySnapshot>(
+                              stream: paylinks,
+                              builder: (
+                                  BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot,
+                                  ) {
+                                if (snapshot.hasError) {
+                                  return Text("error loading data");
+                                }
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return Text("loading.....");
+                                }
+                                final data1 = snapshot.requireData;
+                                return Text("${data1.docs[0]['slogan']}",
+                                  style: TextStyle(
+                                    fontSize:15,
+                                  ),
+                                );
+                              },
+                            ),
                           )
                         ],
                       ),
@@ -97,12 +104,64 @@ class Paylink extends StatelessWidget {
               ),
               Container(
                 margin:EdgeInsets.all(0),
-                child: showamt() ,
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: paylinks,
+                  builder: (
+                      BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot,
+                      ) {
+                    if (snapshot.hasError) {
+                      return Text("error loading data");
+                    }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Text("loading.....");
+                    }
+                    final data1 = snapshot.requireData;
+
+                    if(data1.docs[0]['amt']==null){
+                      return TextFormField(
+
+                          controller: _useramt,
+                          validator: (value) {
+                            if(value== null || value.isEmpty){
+                              return 'please enter an amt';
+                            }
+                            return null;
+                          },
+                          decoration: const InputDecoration(
+                            hintText: "enter amount to send",
+                            icon: Icon(Icons.verified_user_outlined),
+                          ),
+
+                      );
+                    }
+                    return Text("${data1.docs[0]['amt']}",
+                      style: TextStyle(
+                        fontSize:30, fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
+                )  ,
               ),
               Container(
                 margin: EdgeInsets.all(25),
-                child: Text("to ${companyName} using MTN Mobile Money"
-                "Click send to proceed with payment"),
+                child:StreamBuilder<QuerySnapshot>(
+                  stream: momo_universe,
+                  builder: (
+                      BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot,
+                      ) {
+                    if (snapshot.hasError) {
+                      return Text("error loading data");
+                    }
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Text("loading.....");
+                    }
+                    final data1 = snapshot.requireData;
+                    return Text("to ${data1.docs[0]['name']} using Mtn mobile Money"
+                        "Click send to proceed with payment");
+                  },),
+
               ),
               Container(
                 margin: EdgeInsets.all(10),

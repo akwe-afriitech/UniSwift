@@ -1,64 +1,121 @@
 import 'package:flutter/material.dart';
 import 'package:momo_universe/repo/auth.dart';
 import 'package:momo_universe/screen/costumiselink.dart';
+import 'package:momo_universe/screen/customize.dart';
 import 'package:momo_universe/screen/faqs.dart';
 import 'package:momo_universe/screen/invoice.dart';
 import 'package:momo_universe/screen/recieve.dart';
 import 'package:momo_universe/screen/send.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Dashboard2 extends StatelessWidget {
-  Dashboard2({Key? key,  required this.userName, required this.userNum}) : super(key: key);
-    String userName;
-    String userNum;
-  final User? user= Auth().currentUser;
-  Future<void> signOut()async{
-  await Auth().signOut();
+  Dashboard2({Key? key}) : super(key: key);
+
+  final User? user = Auth().currentUser;
+  final _amtController=TextEditingController();
+  final _numController=TextEditingController();
+  Future<void> signOut() async {
+    await Auth().signOut();
   }
 
-  Widget _title(){
-  return const Text("UniSwif");
+  final Stream<QuerySnapshot> momo_universe =
+      FirebaseFirestore.instance.collection("momo_universe").snapshots();
+  Widget _names(){
+    return StreamBuilder<QuerySnapshot>(
+    stream: momo_universe,
+    builder: (
+        BuildContext context,
+        AsyncSnapshot<QuerySnapshot> snapshot,
+        ) {
+      if (snapshot.hasError) {
+        return Text("error loading data");
+      }
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Text("loading.....");
+      }
+      final data1 = snapshot.requireData;
+      return Text("${data1.docs[0]['number']}");
+    },);
   }
-  Widget _userUi(){
-  return Text(user?.email ?? "user email",
-  );
+  Widget _title() {
+    return const Text("UniSwif");
   }
-  Widget _usernum(){
+
+  Widget _userUi() {
+    return Text(
+      user?.email ?? "user email",
+    );
+  }
+
+  Widget _usernum() {
     return Text(user?.phoneNumber ?? "usernum");
   }
-  Widget _signOutButton(){
-  return ElevatedButton(
-  onPressed: signOut,
-  child: Text("signout")
-  );
+
+  Widget _signOutButton() {
+    return ElevatedButton(onPressed: signOut, child: Text("signout"));
   }
-  Widget _userName(){
+
+  Widget _userName() {
     return Text("user");
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: Container(child: Text("UniSwift".toUpperCase())),
+          title: Container(child: Text("UniSwif".toUpperCase())),
           backgroundColor: Colors.green,
         ),
         drawer: Drawer(
+
           child: ListView(
             children: [
               UserAccountsDrawerHeader(
                 currentAccountPicture: CircleAvatar(
                   child: Icon(Icons.person),
                 ),
-                accountName: Text(userName,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                accountName: Container(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: momo_universe,
+                    builder: (
+                      BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot,
+                    ) {
+                      if (snapshot.hasError) {
+                        return Text("error loading data");
+                      }
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Text("loading.....");
+                      }
+                      final data1 = snapshot.requireData;
+                      return Text("${data1.docs[0]['name']}",
+                        style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold),
+                      );
+                    },
+                  ),
                 ),
-                accountEmail:Text(userNum),
+                accountEmail: Container(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: momo_universe,
+                    builder: (
+                      BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot,
+                    ) {
+                      if (snapshot.hasError) {
+                        return Text("error loading data");
+                      }
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Text("loading.....");
+                      }
+                      final data1 = snapshot.requireData;
+                      return Text("${data1.docs[0]['number']}");
+                    },
+                  ),
+                ),
                 otherAccountsPictures: [
                   CircleAvatar(
                     child: Icon(Icons.person_add),
@@ -74,8 +131,7 @@ class Dashboard2 extends StatelessWidget {
                 leading: Icon(Icons.money),
                 title: Text("generate paylinks"),
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: ((context) => Costumisepl())));
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=> Coustomize() ));
                 },
               ),
               ListTile(
@@ -101,6 +157,14 @@ class Dashboard2 extends StatelessWidget {
                     ),
                   );
                 },
+              ),
+              Container(
+                width: 20,
+                margin: EdgeInsets.symmetric(horizontal:50),
+                padding: EdgeInsets.symmetric(vertical:50),
+
+                child: _signOutButton(),
+
               ),
             ],
           ),
@@ -166,9 +230,28 @@ class Dashboard2 extends StatelessWidget {
                               children: [
                                 Container(
                                   alignment: Alignment.centerLeft,
-                                  child: Text(userName,
-                                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                                  )
+                                  child: StreamBuilder<QuerySnapshot>(
+                                    stream: momo_universe,
+                                    builder: (
+                                      BuildContext context,
+                                      AsyncSnapshot<QuerySnapshot> snapshot,
+                                    ) {
+                                      if (snapshot.hasError) {
+                                        return Text("error loading data");
+                                      }
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Text("loading.....");
+                                      }
+                                      final data1 = snapshot.requireData;
+                                      return Text(
+                                          "${data1.docs[0]['name']}",
+                                        style: TextStyle(
+                                            fontSize: 30,
+                                            fontWeight: FontWeight.bold),
+                                      );
+                                    },
+                                  ),
                                 ),
                                 Container(
                                   alignment: Alignment.centerLeft,
@@ -208,11 +291,27 @@ class Dashboard2 extends StatelessWidget {
                             flex: 62,
                             child: Container(
                               alignment: Alignment.centerLeft,
-                              child:Text(
-                                userNum,
-                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-
-                              )
+                              child: StreamBuilder<QuerySnapshot>(
+                                stream: momo_universe,
+                                builder: (
+                                  BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot,
+                                ) {
+                                  if (snapshot.hasError) {
+                                    return Text("error loading data");
+                                  }
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Text("loading.....");
+                                  }
+                                  final data1 = snapshot.requireData;
+                                  return Text(
+                                      "${data1.docs[0]['number']}",
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold),);
+                                },
+                              ),
                             ),
                           ),
                         ],
@@ -320,6 +419,7 @@ class Dashboard2 extends StatelessWidget {
                                         ),
                                       ),
                                       TextFormField(
+                                        controller: _numController,
                                         decoration: const InputDecoration(
                                           hintText: "Enter MoMo Number",
                                           hintStyle: TextStyle(fontSize: 13),
@@ -328,6 +428,7 @@ class Dashboard2 extends StatelessWidget {
                                         ),
                                       ),
                                       TextFormField(
+                                        controller: _amtController,
                                         decoration: const InputDecoration(
                                           hintText: "Enter Amount",
                                           hintStyle: TextStyle(fontSize: 13),
@@ -345,13 +446,21 @@ class Dashboard2 extends StatelessWidget {
                                             children: [
                                               Container(
                                                 child: ElevatedButton(
-                                                  onPressed: () {},
-                                                  child: Text("cancel"),
+                                                  child: Text("Cancel"),
+                                                  onPressed: () => Navigator.pop(context),
                                                 ),
                                               ),
                                               Container(
                                                 child: ElevatedButton(
-                                                  onPressed: () {},
+                                                  onPressed: () {
+                                                    final number = _numController.text;
+                                                    final amt = _amtController.text;
+                                                    if(number.isEmpty || amt.isEmpty){
+                                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('please fill the fields')));
+                                                    }else{
+
+                                                    }
+                                                  },
                                                   child: Text("Send"),
                                                 ),
                                               ),

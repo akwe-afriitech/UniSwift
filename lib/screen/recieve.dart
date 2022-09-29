@@ -37,7 +37,7 @@ class Recieve extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.all(16),
                   child: Container(
-                    child: const Text("uoadsfhafkjashfkjashdfaskjldfhajsk"),
+                    child: const Text("localhost/6.6.4.3/#/paylink"),
                   ),
                 ),
                 Container(
